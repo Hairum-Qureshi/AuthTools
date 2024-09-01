@@ -47,7 +47,7 @@ class EmailValidator {
 	}
 
 	setEmail(email: string) {
-		this.email = email;
+		this.email = email.toLowerCase();
 	}
 
 	get isValidEduEmail(): boolean {
@@ -94,7 +94,7 @@ class EmailValidator {
 	// TODO - add a more descriptive name for 'errorName'
 
 	validateEmail(email: string, options: EmailOptions) {
-		this.email = email;
+		this.email = email.toLowerCase();
 		this.permittedDomains = options.permittedDomains;
 		this.strictDomain = options.strictDomain;
 		this.showPermittedDomains = options.showPermittedDomains || false;
