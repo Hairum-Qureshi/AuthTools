@@ -16,5 +16,4 @@ const test = {
 
 const email = "hqureshi@udel.edu";
 const x = new EmailValidator();
-x.setEmail = email;
-console.log(x.validateEmail(email, test));
+console.log(x.setEmail(email).isValidEduEmail);

@@ -34,8 +34,9 @@ class EmailValidator {
 		this.isEduEmail = false;
 	}
 
-	set setEmail(email: string) {
+	setEmail(email: string) {
 		this.email = email;
+		return this;
 	}
 
 	get isValidEduEmail(): boolean {
