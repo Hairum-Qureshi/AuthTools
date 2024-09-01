@@ -39,6 +39,8 @@ class EmailValidator {
 		return this;
 	}
 
+	// maybe create a method checking if the email is a temporary email?
+
 	get isValidEduEmail(): boolean {
 		return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(edu)$/i.test(this.email);
 	}
@@ -62,7 +64,7 @@ class EmailValidator {
 			// TODO - implement logic to validate the email
 		} else {
 			throw new Error(
-				"Email is an edu email; cannot validate with options. Use the 'isValidEduEmail' instead"
+				"Email is an edu email; cannot validate with options. Use the 'isValidEduEmail' instead to check if an email is a valid edu email"
 			);
 		}
 	}
