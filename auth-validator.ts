@@ -131,7 +131,7 @@ class EmailValidator {
 
 			throw errorObject;
 		} else if (!permittedDomains.includes(email.split("@")[1])) {
-			if (!showPermittedDomains) {
+			if (showPermittedDomains) {
 				const errorObject = this.createError(
 					`Email domain '@${
 						email.split("@")[1]
