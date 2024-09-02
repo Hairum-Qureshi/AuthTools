@@ -10,6 +10,8 @@ interface ErrorObject {
 	errorName: string;
 }
 
+// ! Regex utilized is RFC 5322
+
 /*
 	onlyEduEmails?: boolean; // false by default
 	
@@ -48,6 +50,7 @@ class EmailValidator {
 
 	setEmail(email: string) {
 		this.email = email.toLowerCase();
+		return this;
 	}
 
 	get isValidEduEmail(): boolean {
@@ -90,8 +93,14 @@ class EmailValidator {
 	// TODO - need to add a check to make sure users are adding the extensions after the '@' symbol in the permitted domains array
 	// TODO - handle cases where it's an edu email and check if it's valid
 	// TODO - need to make sure permitted domains does not contain duplicate domains
-	// TODO - ensure lowercase safety
 	// TODO - add a more descriptive name for 'errorName'
+
+	isValidEmail() {
+		const emailRegex =
+			/([-!#-'*+\/-9=?A-Z^-~]+(\.[-!#-'*+\/-9=?A-Z^-~]+)*|"([]!#-[^-~ \t]|(\\[\t -~]))+")@[0-9A-Za-z]([0-9A-Za-z-]{0,61}[0-9A-Za-z])?(\.[0-9A-Za-z]([0-9A-Za-z-]{0,61}[0-9A-Za-z])?)+/;
+
+		return emailRegex.test(this.email);
+	}
 
 	validateEmail(email: string, options: EmailOptions) {
 		this.email = email.toLowerCase();
@@ -100,6 +109,12 @@ class EmailValidator {
 		this.showPermittedDomains = options.showPermittedDomains || false;
 
 		// TODO - first and foremost: check if the email passed in is in a valid format
+		// TODO - check if the local part of the email address does not exceed 254 characters
+
+		if (!this.isValidEmail()) {
+			const errorObject = this.createError("Incorrect email format");
+			throw errorObject;
+		}
 
 		const {
 			strictDomain,
