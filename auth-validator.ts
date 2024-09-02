@@ -122,7 +122,7 @@ class EmailValidator {
 		if (minLocalLength) {
 			if (minLocalLength > this.MIN_LOCAL_EMAIL_LENGTH) {
 				const errorObject = this.createError(
-					`The minimum length the local part of an email can be is 254 characters`
+					`The minimum length the local part of an email can be is 3 characters`
 				);
 				throw errorObject;
 			} else if (local_half.length < minLocalLength) {
