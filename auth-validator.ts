@@ -28,8 +28,8 @@ class EmailValidator {
 	private isEduEmail: boolean;
 	private asArray: boolean;
 	private showPermittedDomains: boolean;
-	private MAX_EMAIL_LENGTH = 254;
-	private MIN_EMAIL_LENGTH = 3;
+	private MAX_LOCAL_EMAIL_LENGTH = 254;
+	private MIN_LOCAL_EMAIL_LENGTH = 3;
 
 	constructor() {
 		this.email = "";
@@ -120,7 +120,7 @@ class EmailValidator {
 		const local_half = this.email.split("@")[0];
 
 		if (minLocalLength) {
-			if (minLocalLength > this.MIN_EMAIL_LENGTH) {
+			if (minLocalLength > this.MIN_LOCAL_EMAIL_LENGTH) {
 				const errorObject = this.createError(
 					`The minimum length the local part of an email can be is 254 characters`
 				);
@@ -134,7 +134,7 @@ class EmailValidator {
 		}
 
 		if (maxLocalLength) {
-			if (maxLocalLength > this.MAX_EMAIL_LENGTH) {
+			if (maxLocalLength > this.MAX_LOCAL_EMAIL_LENGTH) {
 				const errorObject = this.createError(
 					`The maximum length the local part of an email can be is 254 characters`
 				);
