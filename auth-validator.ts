@@ -11,7 +11,9 @@ interface ErrorObject {
 }
 
 // ! Regex utilized is RFC 5322
+// https://stackoverflow.com/questions/13992403/regex-validation-of-email-addresses-according-to-rfc5321-rfc5322
 
+// TODO - still need to handle these methods regarding edu emails:
 /*
 	onlyEduEmails?: boolean; // false by default
 	
@@ -26,6 +28,8 @@ class EmailValidator {
 	private isEduEmail: boolean;
 	private asArray: boolean;
 	private showPermittedDomains: boolean;
+	private MAX_EMAIL_LENGTH = 254;
+	private MIN_EMAIL_LENGTH = 3;
 
 	constructor() {
 		this.email = "";
@@ -94,8 +98,62 @@ class EmailValidator {
 	// TODO - handle cases where it's an edu email and check if it's valid
 	// TODO - need to make sure permitted domains does not contain duplicate domains
 	// TODO - add a more descriptive name for 'errorName'
+	// TODO - maybe add a method that'll check if the email domain came from a specific domain?
+	//	-> see: https://stackoverflow.com/questions/3270185/javascript-regex-to-determine-the-emails-domain-yahoo-com-for-example
 
-	isValidEmail() {
+	isValidEmail(
+		domain?: string,
+		maxLocalLength?: number,
+		minLocalLength?: number
+	) {
+		// Domain expects the email domain after the '@' symbol (ex. gmail.com, icloud.com, etc.)
+		// By default if no domain is provided, the method won't be picky if the domain makes no sense (so long as it passes the regex) so if the user passes in an email like test@gmail.net or test@icloud.school, it'll work fine.
+		// TODO - instead of maybe having a string parameter, change it to be an array of string domains?
+		// TODO - instead of having the parameter be a domain string/array of strings, maybe add a "strict domain" property where it checks if the domain makes sense? Con is, there's tons of domains and you won't be able to cover every case
+
+		// maxLocalLength represents the maximum characters the local part of the email (the text before the '@' symbol) can be.
+		// if it's not provided, it will utilize the default max which is 254 characters
+
+		// minLocalLength represents the minimum characters the local part of the email (the text before the '@' symbol) can be.
+		// If it's not provided, it will utilize the default min which is 3 characters
+
+		const local_half = this.email.split("@")[0];
+
+		if (minLocalLength) {
+			if (minLocalLength > this.MIN_EMAIL_LENGTH) {
+				const errorObject = this.createError(
+					`The minimum length the local part of an email can be is 254 characters`
+				);
+				throw errorObject;
+			} else if (local_half.length < minLocalLength) {
+				const errorObject = this.createError(
+					`The local part of your email must be at least ${minLocalLength} characters long`
+				);
+				throw errorObject;
+			}
+		}
+
+		if (maxLocalLength) {
+			if (maxLocalLength > this.MAX_EMAIL_LENGTH) {
+				const errorObject = this.createError(
+					`The maximum length the local part of an email can be is 254 characters`
+				);
+				throw errorObject;
+			} else if (local_half.length > maxLocalLength) {
+				const errorObject = this.createError(
+					`The local part of your email must be smaller than ${maxLocalLength} characters long`
+				);
+				throw errorObject;
+			}
+		}
+
+		if (domain && this.email.split("@")[1] !== domain) {
+			const errorObject = this.createError(
+				"Email domain does not match expected domain"
+			);
+			throw errorObject;
+		}
+
 		const emailRegex =
 			/([-!#-'*+\/-9=?A-Z^-~]+(\.[-!#-'*+\/-9=?A-Z^-~]+)*|"([]!#-[^-~ \t]|(\\[\t -~]))+")@[0-9A-Za-z]([0-9A-Za-z-]{0,61}[0-9A-Za-z])?(\.[0-9A-Za-z]([0-9A-Za-z-]{0,61}[0-9A-Za-z])?)+/;
 
