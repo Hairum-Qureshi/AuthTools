@@ -60,8 +60,18 @@ class EmailValidator {
 		return this;
 	}
 
-	get isValidEduEmail(): boolean {
-		return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(edu)$/i.test(this.email);
+	isValidEduEmail(eduRegex?: RegExp): boolean {
+		// TODO - maybe allow the user to add their own custom edu email regex?
+		if (!this.email) {
+			const errorObject = this.createError(
+				"No email provided. Make sure you're using the the 'setEmail()' method to provide an email"
+			);
+			throw errorObject;
+		}
+
+		return eduRegex
+			? eduRegex.test(this.email)
+			: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(edu)$/i.test(this.email);
 	}
 
 	setValidDomains(domains: string[], asArray?: boolean) {
@@ -113,8 +123,6 @@ class EmailValidator {
 	// TODO - add a more descriptive name for 'errorName'
 	// TODO - maybe add a method that'll check if the email domain came from a specific domain?
 	// TODO - include option if users would like to prevent temp emails/check if an email is a temp email
-	// TODO - maybe add the option for users to provide their own email Regex
-	//	-> see: https://stackoverflow.com/questions/3270185/javascript-regex-to-determine-the-emails-domain-yahoo-com-for-example
 
 	isValidEmail(
 		domain?: string,
@@ -138,10 +146,10 @@ class EmailValidator {
 
 		// if (minLocalLength) {
 		// 	if (minLocalLength > this.MIN_LOCAL_EMAIL_LENGTH) {
-		// 		const errorObject = this.createError(
-		// 			`The minimum length the local part of an email can be is 3 characters`
-		// 		);
-		// 		throw errorObject;
+		// const errorObject = this.createError(
+		// 	`The minimum length the local part of an email can be is 3 characters`
+		// );
+		// throw errorObject;
 		// 	} else if (local_half.length < minLocalLength) {
 		// 		const errorObject = this.createError(
 		// 			`The local part of your email must be at least ${minLocalLength} characters long`
@@ -175,6 +183,7 @@ class EmailValidator {
 	}
 
 	setEmailRegex(emailRegex: RegExp) {
+		// Must be regex catered towards validating email - if it's not, it won't validate your email correctly and *may* result in bugs.
 		this.emailRegex = emailRegex;
 		return this;
 	}
