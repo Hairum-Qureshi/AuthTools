@@ -1,7 +1,10 @@
+import { ValidatorErrorHandler } from "./auth-validator";
+
 class UsernameValidator {
 	private username: string;
 	private usernameRegex: RegExp;
 	private strictLowerCase: boolean;
+	private errorObject = new ValidatorErrorHandler();
 
 	constructor() {
 		this.username = "";
@@ -10,6 +13,13 @@ class UsernameValidator {
 		this.strictLowerCase = true;
 	}
 
+	// TODO - create a method that'll allow the user to add in a max length and min length for the username and it'll check
+	// TODO - create a method that'll check if the username contains certain symbols/characters
+	// TODO - create a method that'll remove/replace characters with what the user passes
+	// TODO - create a method that'll convert a string to a username-friendly format
+	// TODO - have a boolean param representing whether or not to filter out inappropriate usernames
+	// TODO - allow the user to blacklist/whitelist certain usernames
+	//      -> maybe also have an array that'll contain strings where the user is able to "override" a blacklisted/whitelisted term
 	// TODO - create a method that'll check if the username is in valid camelCase form and PascalCase form
 	// TODO - create a method that'll allow users to pass in a character they'd like to replace spaces with/maybe allow them to enable/disable the option to remove spaces
 
@@ -20,20 +30,21 @@ class UsernameValidator {
 		const { username } = this;
 
 		if (!username) {
-			throw new Error(
+			const errorObject = this.errorObject.createError(
 				"No username provided. Please be sure to use the 'setUsername' method prior to using this method"
 			);
+
+			throw errorObject;
 		}
 
 		if (username.includes(" ")) {
 			const words: string[] = username.split(" ");
-			// Capitalize the first letter of each word and join them
 			const pascalCasedUsername = words
 				.map(word => word.charAt(0).toUpperCase() + word.slice(1))
 				.join("");
 
-			this.username = pascalCasedUsername; // Set the username property if needed
-			return this.username; // Return the PascalCase username
+			this.username = pascalCasedUsername;
+			return this.username;
 		}
 
 		return username;
@@ -46,9 +57,11 @@ class UsernameValidator {
 		const { username } = this;
 
 		if (!username) {
-			throw new Error(
+			const errorObject = this.errorObject.createError(
 				"No username provided. Please be sure to use the 'setUsername' method prior to using this method"
 			);
+
+			throw errorObject;
 		}
 
 		if (username.includes(" ")) {
@@ -60,17 +73,9 @@ class UsernameValidator {
 						: word.charAt(0).toUpperCase() + word.slice(1)
 				)
 				.join("");
-			this.username = camelCasedString;
-			// let camelCasedUsername = "";
-			// const words = this.username.split(" ");
-			// words.forEach((word: string, index: number) => {
-			// 	camelCasedUsername +=
-			// 		index === 0
-			// 			? word.toLowerCase()
-			// 			: word.charAt(0).toUpperCase() + word.slice(1);
-			// });
 
-			// this.username = camelCasedUsername;
+			this.username = camelCasedString;
+
 			return this.username;
 		} else {
 			return this.username.toLowerCase();
@@ -103,15 +108,21 @@ class UsernameValidator {
 		maxUsernameLength: number
 	) {
 		if (minUsernameLength === 0 || maxUsernameLength === 0) {
-			throw new Error("Min and max username length must be greater than 0");
+			const errorObject = this.errorObject.createError(
+				"Min and max username length must be greater than 0"
+			);
+
+			throw errorObject;
 		} else {
 			if (
 				username.length < minUsernameLength ||
 				username.length > maxUsernameLength
 			) {
-				throw new Error(
+				const errorObject = this.errorObject.createError(
 					`Please make sure your username has a max of ${maxUsernameLength} characters and a minimum of ${minUsernameLength} characters`
 				);
+
+				throw errorObject;
 			}
 		}
 	}
@@ -121,15 +132,6 @@ class UsernameValidator {
 			? this.usernameRegex.test(user_name)
 			: this.usernameRegex.test(this.username);
 	}
-
-	// TODO - create a method where the user is able to add their own username regex
-	// TODO - create a method that'll allow the user to add in a max length and min length for the username and it'll check
-	// TODO - create a method that'll check if the username contains certain symbols/characters
-	// TODO - create a method that'll remove/replace characters with what the user passes
-	// TODO - create a method that'll convert a string to a username-friendly format
-	// TODO - have a boolean param representing whether or not to filter out inappropriate usernames
-	// TODO - allow the user to blacklist/whitelist certain usernames
-	//      -> maybe also have an array that'll contain strings where the user is able to "override" a blacklisted/whitelisted term
 }
 
 export default UsernameValidator;

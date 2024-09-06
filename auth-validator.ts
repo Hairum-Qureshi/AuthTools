@@ -20,6 +20,19 @@ interface ErrorObject {
     permittedEduExtension?: string; // edu email extension (ex. udel.edu, wilmu.edu, etc.) - only applicable if onlyEduEmails is true
 */
 
+class ValidatorErrorHandler {
+	createError(errorMessage: string): ErrorObject {
+		const error = new Error(errorMessage);
+
+		const errorObject = {
+			errorMessage: errorMessage,
+			errorName: error.name
+		};
+
+		return errorObject;
+	}
+}
+
 class EmailValidator {
 	private strictDomain: boolean;
 	private permittedDomains: string[]; // array containing the extensions after the '@' symbol
@@ -31,6 +44,7 @@ class EmailValidator {
 	private MAX_LOCAL_EMAIL_LENGTH = 254;
 	private MIN_LOCAL_EMAIL_LENGTH = 3;
 	private emailRegex: RegExp;
+	private errorObject = new ValidatorErrorHandler();
 
 	constructor() {
 		this.email = "";
@@ -44,17 +58,6 @@ class EmailValidator {
 			/([-!#-'*+\/-9=?A-Z^-~]+(\.[-!#-'*+\/-9=?A-Z^-~]+)*|"([]!#-[^-~ \t]|(\\[\t -~]))+")@[0-9A-Za-z]([0-9A-Za-z-]{0,61}[0-9A-Za-z])?(\.[0-9A-Za-z]([0-9A-Za-z-]{0,61}[0-9A-Za-z])?)+/;
 	}
 
-	private createError(errorMessage: string): ErrorObject {
-		const error = new Error(errorMessage);
-
-		const errorObject = {
-			errorMessage: errorMessage,
-			errorName: error.name
-		};
-
-		return errorObject;
-	}
-
 	setEmail(email: string) {
 		this.email = email.toLowerCase();
 		return this;
@@ -63,9 +66,10 @@ class EmailValidator {
 	isValidEduEmail(eduRegex?: RegExp): boolean {
 		// TODO - maybe allow the user to add their own custom edu email regex?
 		if (!this.email) {
-			const errorObject = this.createError(
+			const errorObject = this.errorObject.createError(
 				"No email provided. Make sure you're using the the 'setEmail()' method to provide an email"
 			);
+
 			throw errorObject;
 		}
 
@@ -173,7 +177,7 @@ class EmailValidator {
 		// }
 
 		if (domain && this.email.split("@")[1] !== domain) {
-			const errorObject = this.createError(
+			const errorObject = this.errorObject.createError(
 				"Email domain does not match expected domain"
 			);
 			throw errorObject;
@@ -198,7 +202,9 @@ class EmailValidator {
 		// TODO - check if the local part of the email address does not exceed 254 characters
 
 		if (!this.isValidEmail()) {
-			const errorObject = this.createError("Incorrect email format");
+			const errorObject = this.errorObject.createError(
+				"Incorrect email format"
+			);
 			throw errorObject;
 		}
 
@@ -212,7 +218,7 @@ class EmailValidator {
 
 		if (permittedDomains.length > 10) {
 			// TODO - need to test if this works
-			const errorObject = this.createError(
+			const errorObject = this.errorObject.createError(
 				"Permitted domains array cannot contain more than 10 domains"
 			);
 
@@ -220,20 +226,20 @@ class EmailValidator {
 		}
 
 		if (strictDomain && permittedDomains.length === 0) {
-			const errorObject = this.createError(
+			const errorObject = this.errorObject.createError(
 				"Permitted domains must be provided if strictDomain is true"
 			);
 
 			throw errorObject;
 		} else if (!strictDomain && permittedDomains.length > 0) {
-			const errorObject = this.createError(
+			const errorObject = this.errorObject.createError(
 				"Permitted domains must not be provided if strictDomain is false"
 			);
 
 			throw errorObject;
 		} else if (!permittedDomains.includes(email.split("@")[1])) {
 			if (showPermittedDomains) {
-				const errorObject = this.createError(
+				const errorObject = this.errorObject.createError(
 					`Email domain '@${
 						email.split("@")[1]
 					}' is not permitted. Permitted domains are: ${this.allowedDomains}`
@@ -241,7 +247,7 @@ class EmailValidator {
 
 				throw errorObject;
 			} else {
-				const errorObject = this.createError(
+				const errorObject = this.errorObject.createError(
 					`Email domain '@${email.split("@")[1]}' is not permitted`
 				);
 
@@ -251,4 +257,4 @@ class EmailValidator {
 	}
 }
 
-export { EmailValidator };
+export { EmailValidator, ValidatorErrorHandler };
