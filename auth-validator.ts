@@ -2,7 +2,7 @@ interface EmailOptions {
 	strictDomain: boolean; // represents whether or not the user can add an email from any domain
 	permittedDomains: string[]; // list of email domains permitted - only required IF strictDomain is true
 	noTempEmails: boolean; // represents whether or not temporary emails are allowed or not - false by default
-	showPermittedDomains?: boolean; // represents whether or ot to show the list of permitted domains on error
+	showPermittedDomains?: boolean; // represents whether or not to show the list of permitted domains on error
 }
 
 interface ErrorObject {
@@ -30,6 +30,7 @@ class EmailValidator {
 	private showPermittedDomains: boolean;
 	private MAX_LOCAL_EMAIL_LENGTH = 254;
 	private MIN_LOCAL_EMAIL_LENGTH = 3;
+	private emailRegex: RegExp;
 
 	constructor() {
 		this.email = "";
@@ -39,6 +40,8 @@ class EmailValidator {
 		this.isEduEmail = false;
 		this.asArray = false;
 		this.showPermittedDomains = false;
+		this.emailRegex =
+			/([-!#-'*+\/-9=?A-Z^-~]+(\.[-!#-'*+\/-9=?A-Z^-~]+)*|"([]!#-[^-~ \t]|(\\[\t -~]))+")@[0-9A-Za-z]([0-9A-Za-z-]{0,61}[0-9A-Za-z])?(\.[0-9A-Za-z]([0-9A-Za-z-]{0,61}[0-9A-Za-z])?)+/;
 	}
 
 	private createError(errorMessage: string): ErrorObject {
@@ -93,12 +96,24 @@ class EmailValidator {
 		}
 	}
 
+	matchesDomain(domain: string) {
+		// given a domain param, this method checks if the inputted email's domain matches the domain entered
+		// must not include @ sign, just the name (i.e. wanna check if it's a Google domain? Use 'gmail' or 'gmail.com')
+		// not recommended to use to check if it's an edu email because it won't be accurate since edu emails have some kinks that differ from other emails
+
+		const domainMatcherRegex = new RegExp(String.raw`@${domain}\s*$`);
+		console.log(domainMatcherRegex);
+		return domainMatcherRegex.test(this.email);
+	}
+
 	// TODO - need to limit the length of the permitted domains array
 	// TODO - need to add a check to make sure users are adding the extensions after the '@' symbol in the permitted domains array
 	// TODO - handle cases where it's an edu email and check if it's valid
 	// TODO - need to make sure permitted domains does not contain duplicate domains
 	// TODO - add a more descriptive name for 'errorName'
 	// TODO - maybe add a method that'll check if the email domain came from a specific domain?
+	// TODO - include option if users would like to prevent temp emails/check if an email is a temp email
+	// TODO - maybe add the option for users to provide their own email Regex
 	//	-> see: https://stackoverflow.com/questions/3270185/javascript-regex-to-determine-the-emails-domain-yahoo-com-for-example
 
 	isValidEmail(
@@ -119,33 +134,35 @@ class EmailValidator {
 
 		const local_half = this.email.split("@")[0];
 
-		if (minLocalLength) {
-			if (minLocalLength > this.MIN_LOCAL_EMAIL_LENGTH) {
-				const errorObject = this.createError(
-					`The minimum length the local part of an email can be is 3 characters`
-				);
-				throw errorObject;
-			} else if (local_half.length < minLocalLength) {
-				const errorObject = this.createError(
-					`The local part of your email must be at least ${minLocalLength} characters long`
-				);
-				throw errorObject;
-			}
-		}
+		// TODO - do some more testing on the logic here. You're able to set the maxLocalLength to 1 which goes against the minLocalLength
 
-		if (maxLocalLength) {
-			if (maxLocalLength > this.MAX_LOCAL_EMAIL_LENGTH) {
-				const errorObject = this.createError(
-					`The maximum length the local part of an email can be is 254 characters`
-				);
-				throw errorObject;
-			} else if (local_half.length > maxLocalLength) {
-				const errorObject = this.createError(
-					`The local part of your email must be smaller than ${maxLocalLength} characters long`
-				);
-				throw errorObject;
-			}
-		}
+		// if (minLocalLength) {
+		// 	if (minLocalLength > this.MIN_LOCAL_EMAIL_LENGTH) {
+		// 		const errorObject = this.createError(
+		// 			`The minimum length the local part of an email can be is 3 characters`
+		// 		);
+		// 		throw errorObject;
+		// 	} else if (local_half.length < minLocalLength) {
+		// 		const errorObject = this.createError(
+		// 			`The local part of your email must be at least ${minLocalLength} characters long`
+		// 		);
+		// 		throw errorObject;
+		// 	}
+		// }
+
+		// if (maxLocalLength) {
+		// 	if (maxLocalLength > this.MAX_LOCAL_EMAIL_LENGTH) {
+		// 		const errorObject = this.createError(
+		// 			`The maximum length the local part of an email can be is 254 characters`
+		// 		);
+		// 		throw errorObject;
+		// 	} else if (local_half.length > maxLocalLength) {
+		// 		const errorObject = this.createError(
+		// 			`The local part of your email must be smaller than ${maxLocalLength} characters long`
+		// 		);
+		// 		throw errorObject;
+		// 	}
+		// }
 
 		if (domain && this.email.split("@")[1] !== domain) {
 			const errorObject = this.createError(
@@ -154,10 +171,12 @@ class EmailValidator {
 			throw errorObject;
 		}
 
-		const emailRegex =
-			/([-!#-'*+\/-9=?A-Z^-~]+(\.[-!#-'*+\/-9=?A-Z^-~]+)*|"([]!#-[^-~ \t]|(\\[\t -~]))+")@[0-9A-Za-z]([0-9A-Za-z-]{0,61}[0-9A-Za-z])?(\.[0-9A-Za-z]([0-9A-Za-z-]{0,61}[0-9A-Za-z])?)+/;
+		return this.emailRegex.test(this.email);
+	}
 
-		return emailRegex.test(this.email);
+	setEmailRegex(emailRegex: RegExp) {
+		this.emailRegex = emailRegex;
+		return this;
 	}
 
 	validateEmail(email: string, options: EmailOptions) {
