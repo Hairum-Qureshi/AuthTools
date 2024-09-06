@@ -11,8 +11,12 @@ class UsernameValidator {
 	}
 
 	// TODO - create a method that'll check if the username is in valid camelCase form and PascalCase form
+	// TODO - create a method that'll allow users to pass in a character they'd like to replace spaces with/maybe allow them to enable/disable the option to remove spaces
 
 	toPascalCase(): string {
+		// expects a username with spaces (ex. 'some username here')
+		// it will convert that username to pascalCase like so: SomeUsernameHere (capitalizes the first letter of every word)
+		// if a username with no spaces is provided, it will simply return the username as-is
 		const { username } = this;
 
 		if (!username) {
@@ -22,15 +26,14 @@ class UsernameValidator {
 		}
 
 		if (username.includes(" ")) {
-			let pascalCasedUsername = "";
 			const words: string[] = username.split(" ");
-			words.forEach((word: string) => {
-				pascalCasedUsername += word.charAt(0).toUpperCase() + word.slice(1);
-			});
+			// Capitalize the first letter of each word and join them
+			const pascalCasedUsername = words
+				.map(word => word.charAt(0).toUpperCase() + word.slice(1))
+				.join("");
 
-			this.username = pascalCasedUsername;
-			return this.username;
-		} else {
+			this.username = pascalCasedUsername; // Set the username property if needed
+			return this.username; // Return the PascalCase username
 		}
 
 		return username;
@@ -49,16 +52,25 @@ class UsernameValidator {
 		}
 
 		if (username.includes(" ")) {
-			let camelCasedUsername = "";
-			const words = this.username.split(" ");
-			words.forEach((word: string, index: number) => {
-				camelCasedUsername +=
+			const camelCasedString = username
+				.split(" ")
+				.map((word: string, index: number) =>
 					index === 0
 						? word.toLowerCase()
-						: word.charAt(0).toUpperCase() + word.slice(1);
-			});
+						: word.charAt(0).toUpperCase() + word.slice(1)
+				)
+				.join("");
+			this.username = camelCasedString;
+			// let camelCasedUsername = "";
+			// const words = this.username.split(" ");
+			// words.forEach((word: string, index: number) => {
+			// 	camelCasedUsername +=
+			// 		index === 0
+			// 			? word.toLowerCase()
+			// 			: word.charAt(0).toUpperCase() + word.slice(1);
+			// });
 
-			this.username = camelCasedUsername;
+			// this.username = camelCasedUsername;
 			return this.username;
 		} else {
 			return this.username.toLowerCase();
