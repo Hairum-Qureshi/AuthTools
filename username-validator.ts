@@ -10,6 +10,32 @@ class UsernameValidator {
 		this.strictLowerCase = true;
 	}
 
+	// TODO - create a method that'll check if the username is in valid camelCase form and PascalCase form
+
+	toPascalCase(): string {
+		const { username } = this;
+
+		if (!username) {
+			throw new Error(
+				"No username provided. Please be sure to use the 'setUsername' method prior to using this method"
+			);
+		}
+
+		if (username.includes(" ")) {
+			let pascalCasedUsername = "";
+			const words: string[] = username.split(" ");
+			words.forEach((word: string) => {
+				pascalCasedUsername += word.charAt(0).toUpperCase() + word.slice(1);
+			});
+
+			this.username = pascalCasedUsername;
+			return this.username;
+		} else {
+		}
+
+		return username;
+	}
+
 	toCamelCase() {
 		// expects a username with spaces (ex. 'some username here')
 		// it will convert that username to camelCase like so: someUsernameHere
@@ -23,17 +49,17 @@ class UsernameValidator {
 		}
 
 		if (username.includes(" ")) {
-			const words: string[] = username.split(" ");
 			let camelCasedUsername = "";
+			const words = this.username.split(" ");
 			words.forEach((word: string, index: number) => {
 				camelCasedUsername +=
 					index === 0
 						? word.toLowerCase()
-						: word.replace(word[0], word[0].toUpperCase());
+						: word.charAt(0).toUpperCase() + word.slice(1);
 			});
 
 			this.username = camelCasedUsername;
-			return camelCasedUsername;
+			return this.username;
 		} else {
 			return this.username.toLowerCase();
 		}
