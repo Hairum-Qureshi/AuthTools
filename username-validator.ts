@@ -5,12 +5,20 @@ class UsernameValidator {
 	private usernameRegex: RegExp;
 	private strictLowerCase: boolean;
 	private errorObject = new ValidatorErrorHandler();
+	private usernameMaxLength: number;
+	private usernameMinLength: number;
 
 	constructor() {
 		this.username = "";
-		// this.usernameRegex = /^[a-zA-Z0-9_]{3,16}$/;
-		this.usernameRegex = /^[a-zA-Z0-9]+$/;
+		// this.usernameRegex = /^[a-zA-Z0-9]+$/;
 		this.strictLowerCase = true;
+		this.usernameMaxLength = 256;
+		this.usernameMinLength = 5;
+		this.usernameRegex = new RegExp(
+			String.raw`/^[a-zA-Z0-9_]{${
+				(this.usernameMinLength, this.usernameMaxLength)
+			}}$/`
+		);
 	}
 
 	// TODO - create a method that'll allow the user to add in a max length and min length for the username and it'll check
