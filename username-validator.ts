@@ -1,4 +1,20 @@
 import { ValidatorErrorHandler } from "./auth-validator";
+import profanity from "./profanity.json";
+
+interface ProfanityDetails {
+	id: string;
+	match: string;
+	tags: string[];
+	severity: number;
+	exceptions?: string[];
+}
+
+interface Details {
+	message: string;
+	username: string;
+	profanityData?: ProfanityDetails;
+	isProfane: boolean;
+}
 
 class UsernameValidator {
 	private username: string;
@@ -88,6 +104,58 @@ class UsernameValidator {
 		} else {
 			return this.username.toLowerCase();
 		}
+	}
+
+	private binarySearch(profanity: ProfanityDetails[], target: string): number {
+		let leftIndex = 0;
+		let rightIndex = profanity.length - 1;
+		while (leftIndex <= rightIndex) {
+			let middleIndex = Math.floor((leftIndex + rightIndex) / 2);
+			if (profanity[middleIndex].match.includes(target)) {
+				return middleIndex;
+			}
+			// TODO - need to make this logic work because 'target' is a string
+			if (target < profanity[middleIndex].match) {
+				rightIndex = middleIndex - 1;
+			} else {
+				leftIndex = middleIndex + 1;
+			}
+		}
+		return -1;
+	}
+
+	isInappropriateUsername(wantDetails?: boolean): boolean | Details {
+		// wantDetails - a boolean representing if the method should return some details about whether or not the username is inappropriate
+		// assumes username uses underscores
+		const index = this.binarySearch(
+			profanity,
+			this.username.toLowerCase().replace(/_/g, " ")
+		);
+
+		if (!this.username) {
+			const errorObject = this.errorObject.createError(
+				"No username provided. Make sure you're using the the 'setUsername()' method to provide a username"
+			);
+			throw errorObject;
+		}
+
+		if (index === -1 && wantDetails) {
+			return {
+				message:
+					"This username does not appear to be inappropriate. If you find this to be a mistake, please be sure to blacklist it by using the 'blackList' method",
+				username: this.username,
+				isProfane: false
+			};
+		} else if (index !== -1 && wantDetails) {
+			return {
+				message: "This username is inappropriate",
+				username: this.username,
+				profanityData: profanity[index],
+				isProfane: true
+			};
+		}
+
+		return index === -1;
 	}
 
 	setUsername(username: string, lowercaseStrict?: boolean) {
