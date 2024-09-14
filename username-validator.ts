@@ -226,6 +226,16 @@ class UsernameValidator {
 			this.strictLowerCase = false;
 		}
 
+		this.blackListedUsernames.map((bannedWord: string) => {
+			if (bannedWord === username.toLowerCase()) {
+				const errorObject = this.errorObject.createError(
+					"This username is blacklisted. Please try another username"
+				);
+
+				throw errorObject;
+			}
+		});
+
 		this.username = this.strictLowerCase ? username.toLowerCase() : username;
 		return this;
 	}
