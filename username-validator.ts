@@ -53,8 +53,6 @@ class UsernameValidator {
 	// TODO - create a method that'll remove/replace characters with what the user passes
 	// TODO - create a method that'll convert a string to a username-friendly format
 	// TODO - have a boolean param representing whether or not to filter out inappropriate usernames
-	// TODO - allow the user to blacklist/whitelist certain usernames
-	//      -> maybe also have an array that'll contain strings where the user is able to "override" a blacklisted/whitelisted term
 	// TODO - create a method that'll check if the username is in valid camelCase form and PascalCase form
 	// TODO - create a method that'll allow users to pass in a character they'd like to replace spaces with/maybe allow them to enable/disable the option to remove spaces
 	// TODO - implement logic to check if the username the user passes in exists inside of the black listed array
@@ -64,9 +62,9 @@ class UsernameValidator {
 		// expects a username with spaces (ex. 'some username here')
 		// it will convert that username to pascalCase like so: SomeUsernameHere (capitalizes the first letter of every word)
 		// if a username with no spaces is provided, it will simply return the username as-is
-		const { username } = this;
+		// TODO - maybe make it so that if a username is something like 'userName', it will check if the string is in valid camelCase and if it is, it would simply need to capitalize the first letter
 
-		if (!username) {
+		if (!this.username) {
 			const errorObject = this.errorObject.createError(
 				"No username provided. Please be sure to use the 'setUsername' method prior to using this method"
 			);
@@ -74,17 +72,31 @@ class UsernameValidator {
 			throw errorObject;
 		}
 
-		if (username.includes(" ")) {
-			const words: string[] = username.split(" ");
+		if (this.username.includes(" ")) {
+			const words: string[] = this.username.split(" ");
 			const pascalCasedUsername = words
 				.map(word => word.charAt(0).toUpperCase() + word.slice(1))
 				.join("");
 
 			this.username = pascalCasedUsername;
-			return username;
+			return this.username;
 		}
 
-		return username;
+		return this.username;
+	}
+
+	isValidPascalCase() {
+		if (!this.username) {
+			const errorObject = this.errorObject.createError(
+				"No username provided. Please be sure to use the 'setUsername' method prior to using this method"
+			);
+
+			throw errorObject;
+		}
+
+		return /[A-Z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*/.test(
+			this.username
+		);
 	}
 
 	toCamelCase() {
@@ -92,9 +104,8 @@ class UsernameValidator {
 		// expects a username with spaces (ex. 'some username here')
 		// it will convert that username to camelCase like so: someUsernameHere
 		// if a username with no spaces is provided, it will simply convert it to lowercase
-		const { username } = this;
 
-		if (!username) {
+		if (!this.username) {
 			const errorObject = this.errorObject.createError(
 				"No username provided. Please be sure to use the 'setUsername' method prior to using this method"
 			);
@@ -102,8 +113,8 @@ class UsernameValidator {
 			throw errorObject;
 		}
 
-		if (username.includes(" ")) {
-			const camelCasedString = username
+		if (this.username.includes(" ")) {
+			const camelCasedString = this.username
 				.split(" ")
 				.map((word: string, index: number) =>
 					index === 0
@@ -114,9 +125,9 @@ class UsernameValidator {
 
 			this.username = camelCasedString;
 
-			return username;
+			return this.username;
 		} else {
-			return username.toLowerCase();
+			return this.username.toLowerCase();
 		}
 	}
 
