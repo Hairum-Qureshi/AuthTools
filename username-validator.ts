@@ -1,5 +1,15 @@
 import { ValidatorErrorHandler } from "./auth-validator";
+// JSON credit to https://github.com/dsojevic/profanity-list
+// License: MIT
+// A few additions added by me
 import profanity from "./profanity.json";
+
+// TODO:
+// - may need to utilize '.match()' Regex method compared to '.test()' (lookup difference for more research)
+// - utilize the '.endsWith()' method compared to using the splitting logic you normally use
+
+// TODO - ensure username uses the Latin text
+// 		-> https://stackoverflow.com/questions/10940137/regex-test-v-s-string-match-to-know-if-a-string-matches-a-regular-expression
 
 interface ProfanityDetails {
 	id: string;
@@ -23,6 +33,7 @@ class UsernameValidator {
 	private errorObject = new ValidatorErrorHandler();
 	private usernameMaxLength: number;
 	private usernameMinLength: number;
+	private blackListedUsernames: string[];
 
 	constructor() {
 		this.username = "";
@@ -35,6 +46,8 @@ class UsernameValidator {
 				(this.usernameMinLength, this.usernameMaxLength)
 			}}$/`
 		);
+		// TODO - add default values to black list array
+		this.blackListedUsernames = ["admin"];
 	}
 
 	// TODO - create a method that'll allow the user to add in a max length and min length for the username and it'll check
@@ -46,6 +59,8 @@ class UsernameValidator {
 	//      -> maybe also have an array that'll contain strings where the user is able to "override" a blacklisted/whitelisted term
 	// TODO - create a method that'll check if the username is in valid camelCase form and PascalCase form
 	// TODO - create a method that'll allow users to pass in a character they'd like to replace spaces with/maybe allow them to enable/disable the option to remove spaces
+	// TODO - implement logic to check if the username the user passes in exists inside of the black listed array
+	// 		-> may need to also format the usernames inside of the black listed array so they're in proper username format
 
 	toPascalCase(): string {
 		// expects a username with spaces (ex. 'some username here')
@@ -68,7 +83,7 @@ class UsernameValidator {
 				.join("");
 
 			this.username = pascalCasedUsername;
-			return this.username;
+			return username;
 		}
 
 		return username;
@@ -100,35 +115,81 @@ class UsernameValidator {
 
 			this.username = camelCasedString;
 
-			return this.username;
+			return username;
 		} else {
-			return this.username.toLowerCase();
+			return username.toLowerCase();
 		}
 	}
 
-	private binarySearch(profanity: ProfanityDetails[], target: string): number {
+	private binarySearch(target: string): number {
+		// TODO - consider making this algorithm recursive
+		// TODO - need some improvement
 		let leftIndex = 0;
 		let rightIndex = profanity.length - 1;
+
 		while (leftIndex <= rightIndex) {
 			let middleIndex = Math.floor((leftIndex + rightIndex) / 2);
-			if (profanity[middleIndex].match.includes(target)) {
+			let middleId = profanity[middleIndex].id;
+			let middlePattern = new RegExp(profanity[middleIndex].match);
+
+			console.log(target, middleId);
+			if (target.includes(middleId) || middlePattern.test(target)) {
 				return middleIndex;
 			}
-			// TODO - need to make this logic work because 'target' is a string
-			if (target < profanity[middleIndex].match) {
+
+			if (target < middleId) {
 				rightIndex = middleIndex - 1;
 			} else {
 				leftIndex = middleIndex + 1;
 			}
 		}
+
 		return -1;
+	}
+
+	addToBlackList(wordsToAdd: string[]) {
+		if (!this.username) {
+			const errorObject = this.errorObject.createError(
+				"No username provided. Make sure you're using the the 'setUsername()' method to provide a username"
+			);
+			throw errorObject;
+		}
+
+		if (wordsToAdd.length === 0) {
+			const errorObject = this.errorObject.createError(
+				"No words provided. Please make sure your array has at least 1 word inside it"
+			);
+			throw errorObject;
+		}
+
+		wordsToAdd.map((wordToAdd: string) => {
+			if (
+				this.blackListedUsernames.find(
+					(word: string) => word === wordToAdd.toLowerCase()
+				)
+			) {
+				{
+					const errorObject = this.errorObject.createError(
+						`'${wordToAdd}' already exists inside of the black list array`
+					);
+					throw errorObject;
+				}
+			} else {
+				this.blackListedUsernames.push(wordToAdd.toLowerCase());
+			}
+		});
+
+		return this;
+	}
+
+	getBlackListedUsernames(): string[] {
+		return this.blackListedUsernames;
 	}
 
 	isInappropriateUsername(wantDetails?: boolean): boolean | Details {
 		// wantDetails - a boolean representing if the method should return some details about whether or not the username is inappropriate
 		// assumes username uses underscores
 		const index = this.binarySearch(
-			profanity,
 			this.username.toLowerCase().replace(/_/g, " ")
 		);
 
@@ -141,8 +202,7 @@ class UsernameValidator {
 
 		if (index === -1 && wantDetails) {
 			return {
-				message:
-					"This username does not appear to be inappropriate. If you find this to be a mistake, please be sure to blacklist it by using the 'blackList' method",
+				message: "This username does not appear to be inappropriate",
 				username: this.username,
 				isProfane: false
 			};
