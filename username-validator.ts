@@ -42,9 +42,7 @@ class UsernameValidator {
 		this.usernameMaxLength = 256;
 		this.usernameMinLength = 5;
 		this.usernameRegex = new RegExp(
-			String.raw`/^[a-zA-Z0-9_]{${
-				(this.usernameMinLength, this.usernameMaxLength)
-			}}$/`
+			`^[a-zA-Z0-9_]{${this.usernameMinLength},${this.usernameMaxLength}}$`
 		);
 		// TODO - add default values to black list array
 		this.blackListedUsernames = ["admin"];
@@ -90,6 +88,7 @@ class UsernameValidator {
 	}
 
 	toCamelCase() {
+		// TODO - maybe make it accept it with underscores too?
 		// expects a username with spaces (ex. 'some username here')
 		// it will convert that username to camelCase like so: someUsernameHere
 		// if a username with no spaces is provided, it will simply convert it to lowercase
@@ -148,6 +147,8 @@ class UsernameValidator {
 	}
 
 	addToBlackList(wordsToAdd: string[]) {
+		// TODO - maybe implement a max length for the black list array
+		// TODO - maybe add a check to see if the words are in a valid username format?
 		if (!this.username) {
 			const errorObject = this.errorObject.createError(
 				"No username provided. Make sure you're using the the 'setUsername()' method to provide a username"
@@ -219,7 +220,7 @@ class UsernameValidator {
 	}
 
 	setUsername(username: string, lowercaseStrict?: boolean) {
-		// lowerCaseStrict - an optional param where you can enforce usernames being converted to lowercase nor not. By default, it's set to true so all usernames. However, to override that, pass in 'false' which will result in all usernames not being converted to lowercase.
+		// lowerCaseStrict - an optional param where you can enforce usernames being converted to lowercase nor not. By default, it's set to true for all usernames. However, to override that, pass in 'false' which will result in all usernames not being converted to lowercase.
 
 		if (lowercaseStrict === false) {
 			this.strictLowerCase = false;
@@ -229,6 +230,7 @@ class UsernameValidator {
 		return this;
 	}
 
+	// TODO - rename method
 	get u_name(): string {
 		return this.username;
 	}
