@@ -53,8 +53,10 @@ class UsernameValidator {
 	// TODO - create a method that'll remove/replace characters with what the user passes
 	// TODO - create a method that'll convert a string to a username-friendly format
 	// TODO - have a boolean param representing whether or not to filter out inappropriate usernames
+	// TODO - add a snake_case method and a check to see if a username is in valid snake_case form
 	// TODO - create a method that'll check if the username is in valid camelCase form and PascalCase form
 	// TODO - create a method that'll allow users to pass in a character they'd like to replace spaces with/maybe allow them to enable/disable the option to remove spaces
+	// TODO - create a private method that'll simply return an error if there's no username provided which'll prevent duplicate code
 	// TODO - implement logic to check if the username the user passes in exists inside of the black listed array
 	// 		-> may need to also format the usernames inside of the black listed array so they're in proper username format
 
@@ -85,7 +87,7 @@ class UsernameValidator {
 		return this.username;
 	}
 
-	isValidPascalCase() {
+	isValidPascalCase(): boolean {
 		if (!this.username) {
 			const errorObject = this.errorObject.createError(
 				"No username provided. Please be sure to use the 'setUsername' method prior to using this method"
@@ -129,6 +131,18 @@ class UsernameValidator {
 		} else {
 			return this.username.toLowerCase();
 		}
+	}
+
+	isValidCamelCase(): boolean {
+		if (!this.username) {
+			const errorObject = this.errorObject.createError(
+				"No username provided. Please be sure to use the 'setUsername' method prior to using this method"
+			);
+
+			throw errorObject;
+		}
+
+		return /^[a-z]+(?:[A-Z][a-z0-9]*)*$/.test(this.username);
 	}
 
 	private binarySearch(target: string): number {
