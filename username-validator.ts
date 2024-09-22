@@ -11,6 +11,8 @@ import profanity from "./profanity.json";
 // TODO - ensure username uses the Latin text
 // 		-> https://stackoverflow.com/questions/10940137/regex-test-v-s-string-match-to-know-if-a-string-matches-a-regular-expression
 
+// TODO - move the blacklister logic to a separate class that extends the username validator
+
 interface ProfanityDetails {
 	id: string;
 	match: string;
@@ -27,13 +29,13 @@ interface Details {
 }
 
 class UsernameValidator {
-	private username: string;
-	private usernameRegex: RegExp;
-	private strictLowerCase: boolean;
-	private errorObject = new ValidatorErrorHandler();
-	private usernameMaxLength: number;
-	private usernameMinLength: number;
-	private blackListedUsernames: string[];
+	protected username: string;
+	protected usernameRegex: RegExp;
+	protected strictLowerCase: boolean;
+	protected errorObject = new ValidatorErrorHandler();
+	protected usernameMaxLength: number;
+	protected usernameMinLength: number;
+	protected blackListedUsernames: string[];
 
 	constructor() {
 		this.username = "";
@@ -54,7 +56,6 @@ class UsernameValidator {
 	// TODO - create a method that'll convert a string to a username-friendly format
 	// TODO - have a boolean param representing whether or not to filter out inappropriate usernames
 	// TODO - add a snake_case method and a check to see if a username is in valid snake_case form
-	// TODO - create a method that'll check if the username is in valid camelCase form and PascalCase form
 	// TODO - create a method that'll allow users to pass in a character they'd like to replace spaces with/maybe allow them to enable/disable the option to remove spaces
 	// TODO - create a private method that'll simply return an error if there's no username provided which'll prevent duplicate code
 	// TODO - implement logic to check if the username the user passes in exists inside of the black listed array
@@ -196,7 +197,7 @@ class UsernameValidator {
 			) {
 				{
 					const errorObject = this.errorObject.createError(
-						`'${wordToAdd}' already exists inside of the black list array`
+						`'${wordToAdd}' already exists inside of the blacklist array`
 					);
 					throw errorObject;
 				}
@@ -306,5 +307,7 @@ class UsernameValidator {
 			: this.usernameRegex.test(this.username);
 	}
 }
+
+class UsernameBlacklist extends UsernameValidator {}
 
 export default UsernameValidator;
